@@ -1,12 +1,29 @@
 #!/bin/bash
 
-cd /data
-out=tspsharePriceHistory.csv
-max=tspsharePriceHistoryMax.csv
-if ! curl "https://secure.tsp.gov/components/CORS/getSharePrices.html?InvFunds=1&format=CSV&download=1" | sed '1d' > $out ; then
-   exit 1
+path="$1"
+
+if [ "$path" == "" ] ; then
+    echo "Specify path."
+    exit 1
 fi
-cat $out $max > tmp
-cat tmp | awk -F ',' 'BEGIN {ORS=""; maxF = 0; max[2]=0} NF {if (NF > maxF) {maxF = NF} for (i=1; i < NF; i++) { print $i "," ; if (i > 1 && $i+0>0 && $i > max[i]) {max[i] = $i} } ; print "\n" ;} END {print "Max,"; for (i=2;i<maxF;i++) { print max[i] ","} print "\n" }' | tail -n 1 > $max
-rm tmp
+
+cd "$path"
+merge_name=tspsharePriceHistory.csv
+out_name=tspsharePriceHistory_tmp.csv
+archive_name=tspsharePriceHistory`date "+%Y%m%d"`.csv
+docker pull registry.hub.docker.com/mckelvym/tsp.price:1.0.0 && docker run --rm --name=tsp-harvester -u $(id -u):$(id -g) -v "$PWD":/data registry.hub.docker.com/mckelvym/tsp.price:1.0.0 --merge-file=/data/$merge_name --out-file=/data/$out_name
+if [ -s $out_name ] ; then
+    mv $out_name $merge_name
+    cp -v $merge_name $archive_name
+
+    git add -u && \
+	git commit -m "Daily update $archive_name" && \
+	git push
+
+    head $merge_name
+else
+    echo "WARN! File was zero size!"
+fi
 exit
+
+

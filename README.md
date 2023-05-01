@@ -1,11 +1,3 @@
-# TSP CSV Docker Tool
+# TSP Share Price CSV Updater
 
-```
-docker build -t tsp_csv .
-
-docker tag tsp_csv mckelvym/tsp_csv:latest
-docker push mckelvym/tsp_csv:latest
-
-docker run -v `pwd`:/data -u 1000:1000 mckelvym/tsp_csv:latest
-```
-
+Companion to [https://github.com/mckelvym/tsp.price](https://github.com/mckelvym/tsp.price).
