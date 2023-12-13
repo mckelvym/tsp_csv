@@ -10,8 +10,9 @@ fi
 cd "$path"
 merge_name=tspsharePriceHistory.csv
 out_name=tspsharePriceHistory_tmp.csv
+out_rss_name=feed.xml
 archive_name=tspsharePriceHistory`date "+%Y%m%d"`.csv
-docker pull registry.hub.docker.com/mckelvym/tsp.price:1.0.0 && docker run --rm --name=tsp-harvester -u $(id -u):$(id -g) -v "$PWD":/data registry.hub.docker.com/mckelvym/tsp.price:1.0.0 --merge-file=/data/$merge_name --out-file=/data/$out_name
+docker pull registry.hub.docker.com/mckelvym/tsp.price:1.1.0 && docker run --rm --name=tsp-harvester -u $(id -u):$(id -g) -v "$PWD":/data registry.hub.docker.com/mckelvym/tsp.price:1.1.0 --merge-file=/data/$merge_name --out-file=/data/$out_name --out-rss-file=/data/$out_rss_name
 if [ -s $out_name ] ; then
     mv $out_name $merge_name
     cp -v $merge_name $archive_name
